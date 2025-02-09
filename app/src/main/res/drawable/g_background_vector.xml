@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/swamp_color" android:alpha="0" /> <!-- Background color -->
+    <item android:drawable="@drawable/g" android:alpha="255" /> <!-- Vector with transparency -->
+</layer-list>

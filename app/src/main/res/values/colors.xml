@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="swamp_color">#150B00</color>
+    <color name="forest_color">#00733E</color>
+    <color name="mountain_color">#D3202A</color>
+    <color name="island_color">#0E68AB</color>
+</resources>
