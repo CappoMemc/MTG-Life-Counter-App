@@ -1,197 +1,251 @@
 package com.example.mtg_v1
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.Menu
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
-import androidx.activity.ComponentActivity
 import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
+import android.view.Gravity
+import android.view.MenuItem
+import android.widget.GridLayout
+import android.view.MotionEvent
+import android.widget.LinearLayout
 
 class MainActivity : AppCompatActivity() {
-
-    // Declare references to the player life TextViews and buttons
-    private lateinit var player1LifeText: TextView
-    private lateinit var player2LifeText: TextView
-    private lateinit var player3LifeText: TextView
-    private lateinit var player4LifeText: TextView
-
-    private lateinit var player1ChangeText: TextView
-    private lateinit var player2ChangeText: TextView
-    private lateinit var player3ChangeText: TextView
-    private lateinit var player4ChangeText: TextView
-
-    private lateinit var player1Minus1Button: Button
-    private lateinit var player1Plus1Button: Button
-    private lateinit var player2Minus1Button: Button
-    private lateinit var player2Plus1Button: Button
-    private lateinit var player3Minus1Button: Button
-    private lateinit var player3Plus1Button: Button
-    private lateinit var player4Minus1Button: Button
-    private lateinit var player4Plus1Button: Button
+    // Player Class Setup Try1
+    private val handler = Handler(Looper.getMainLooper())
+    private val players = mutableListOf<Player>()
 
     private lateinit var resetButton: Button
+    private lateinit var playersLayout: GridLayout
 
-    private var player1Life = 40
-    private var player2Life = 40
-    private var player3Life = 40
-    private var player4Life = 40
-
-    private var player1Change = 0
-    private var player2Change = 0
-    private var player3Change = 0
-    private var player4Change = 0
-
-    private val LONG_PRESS_INCREMENT = 10   // Life change for long press
-    private val SHORT_PRESS_INCREMENT = 1   // Life change for short press
-
-    private val handler = Handler(Looper.getMainLooper())
-    private val hideChangeRunnable = mutableMapOf<Int, Runnable>()
+  //  private val handler = Handler(Looper.getMainLooper())
+  //  private val hideChangeRunnable = mutableMapOf<Int, Runnable>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)     // Keep the screen on
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
-        // Initialize references from the XML layout
-        player1LifeText = findViewById(R.id.player1Life)
-        player2LifeText = findViewById(R.id.player2Life)
-        player3LifeText = findViewById(R.id.player3Life)
-        player4LifeText = findViewById(R.id.player4Life)
+        playersLayout = findViewById(R.id.playersLayout)
+        setupPlayers(4)
 
-        player1ChangeText = findViewById(R.id.player1Change)
-        player2ChangeText = findViewById(R.id.player2Change)
-        player3ChangeText = findViewById(R.id.player3Change)
-        player4ChangeText = findViewById(R.id.player4Change)
-
-        player1Minus1Button = findViewById(R.id.player1Minus1)
-        player1Plus1Button = findViewById(R.id.player1Plus1)
-        player2Minus1Button = findViewById(R.id.player2Minus1)
-        player2Plus1Button = findViewById(R.id.player2Plus1)
-        player3Minus1Button = findViewById(R.id.player3Minus1)
-        player3Plus1Button = findViewById(R.id.player3Plus1)
-        player4Minus1Button = findViewById(R.id.player4Minus1)
-        player4Plus1Button = findViewById(R.id.player4Plus1)
-
+        // Reset all players' life totals when button is clicked
         resetButton = findViewById(R.id.resetButton)
-
-        // Set up button click listeners to update life totals
-
-
-        setupButtonListeners(player1Plus1Button, 1, SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player1Minus1Button, 1, -SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player2Plus1Button, 2, SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player2Minus1Button, 2, -SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player3Plus1Button, 3, SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player3Minus1Button, 3, -SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player4Plus1Button, 4, SHORT_PRESS_INCREMENT)
-        setupButtonListeners(player4Minus1Button, 4, -SHORT_PRESS_INCREMENT)
-
-        // Set up reset button to reset all life totals to 40
-        resetButton.setOnClickListener {resetLife()}
-
-        // Display initial life values
-        updateLifeDisplay()
-    }
-
-    private fun setupButtonListeners(button: Button, player: Int, delta: Int) {
-        button.setOnClickListener {
-            updateLife(player, delta)
-        }
-
-        button.setOnLongClickListener {
-            performLongClickIncrement(button, player, delta)
-            true    // Indicate long press was handled
+        resetButton.setOnClickListener {
+            players.forEach { it.resetLife() }
         }
     }
 
-    private fun performLongClickIncrement(button: Button, player: Int, delta: Int) {
-        val handler = Handler()
-        val runnable = object : Runnable {
-            override fun run() {
-                updateLife(player, delta*LONG_PRESS_INCREMENT)
-                handler.postDelayed(this, 1000)
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.player_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.menu_2_players -> setupPlayers(2)
+            R.id.menu_3_players -> setupPlayers(3)
+            R.id.menu_4_players -> setupPlayers(4)
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun setupPlayers(playerCount: Int) {
+        players.clear()
+        playersLayout.removeAllViews()
+        playersLayout.columnCount = 2
+        playersLayout.rowCount = (playerCount + 1) / 2
+
+        for (i in 0 until playerCount) {
+            val playerGrid = GridLayout(this).apply {
+                columnCount = 3
+                rowCount = 3
+                setPadding(16, 16, 16, 16)
+                setBackgroundColor(Color.LTGRAY)
+            }
+
+            val layoutParams = GridLayout.LayoutParams().apply {
+                width = 0
+                height = 0
+                columnSpec = GridLayout.spec(i % 2, 1f)
+                rowSpec = GridLayout.spec(i / 2, 1f)
+                setMargins(8, 8, 8, 8)
+            }
+
+            playerGrid.layoutParams = layoutParams
+            addPlayerViews(playerGrid, i)
+            playersLayout.addView(playerGrid)
+        }
+    }
+
+    private fun addPlayerViews(playerGrid: GridLayout, index: Int) {
+        val playerContainer = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(16, 16, 16, 16)
+            setBackgroundColor(Color.DKGRAY)
+            layoutParams = GridLayout.LayoutParams().apply {
+                width = 0
+                height = 0
+                columnSpec = GridLayout.spec(index % 2, 1f)
+                rowSpec = GridLayout.spec(index / 2, 1f)
+                setMargins(8, 8, 8, 8)
             }
         }
-        handler.post(runnable)
 
-        button.setOnTouchListener { v, event ->
-            if (event.action == android.view.MotionEvent.ACTION_UP || event.action == android.view.MotionEvent.ACTION_CANCEL) {
-                handler.removeCallbacks(runnable)  // Stop when button is released
+        // Rotate based on player index
+        // For example, rotate players in top-left (index 0) by 90 degrees
+        if (index % 2 == 0) {
+            playerContainer.rotation = 90f
+        } else {
+            // you can add rotation for other players similarly
+            playerContainer.rotation = -90f
+        }
+        // Add views inside playerContainer
+        val lifeText = TextView(this).apply {
+            text = "40"
+            textSize = 28f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+        }
+
+        val buttonsLayout = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+        }
+
+        val minusButton = Button(this).apply { text = "-" }
+        val plusButton = Button(this).apply { text = "+" }
+
+        buttonsLayout.addView(minusButton)
+        buttonsLayout.addView(plusButton)
+
+        playerContainer.addView(lifeText)
+        playerContainer.addView(buttonsLayout)
+
+        playerGrid.addView(playerContainer)
+
+        // Create Player object and add to list
+        val player = Player(
+            lifeDisplay = lifeText,
+            changeLifeView = TextView(this).apply { visibility = View.GONE }, // if used elsewhere
+            minusButton = minusButton,
+            plusButton = plusButton
+        )
+        players.add(player)
+    }
+
+
+
+
+
+
+    inner class Player(
+        private val lifeDisplay: TextView,
+        private val changeLifeView: TextView,
+        private val minusButton: Button,
+        private val plusButton: Button
+    ) {
+        private var life: Int = 40
+        private var change_life: Int = 0
+        private val LONG_PRESS_INCREMENT = 10
+        private val SHORT_PRESS_INCREMENT = 1
+        private var isLongPressing = false
+        private var hideChangeRunnable: Runnable? = null
+        private var longPressRunnable: Runnable? = null
+
+        init {
+            setupButtonListeners()
+            resetLife()
+        }
+
+        private fun setupButtonListeners() {
+            // Regular short-press
+            plusButton.setOnClickListener {
+                updateLife(SHORT_PRESS_INCREMENT)
+                plusButton.performClick()
             }
-            false
+
+            minusButton.setOnClickListener {
+                updateLife(-SHORT_PRESS_INCREMENT)
+                minusButton.performClick()
+            }
+
+            // Touch listener with proper long press + accessibility support
+            plusButton.setOnTouchListener { view, event ->
+                handleTouch(event, LONG_PRESS_INCREMENT, view)
+                false
+            }
+
+            minusButton.setOnTouchListener { view, event ->
+                handleTouch(event, -LONG_PRESS_INCREMENT, view)
+                false
+            }
+        }
+
+        private fun handleTouch(event: MotionEvent, increment: Int, view: View) {
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    isLongPressing = true
+                    longPressRunnable = object : Runnable {
+                        override fun run() {
+                            if (isLongPressing) {
+                                updateLife(increment)
+                                handler.postDelayed(this, 1000)
+                            }
+                        }
+                    }
+                    handler.postDelayed(longPressRunnable!!, 500)
+                }
+
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    if (!isLongPressing) {
+                        view.performClick() // Required for accessibility
+                    }
+                    isLongPressing = false
+                    longPressRunnable?.let { handler.removeCallbacks(it) }
+                }
+            }
+        }
+
+        private fun updateLife(delta: Int) {
+            life += delta
+            change_life += delta
+            lifeDisplay.text = life.toString()
+            changeLifeView.text = change_life.toString()
+
+            showCumulativeChange(changeLifeView, change_life)
+        }
+
+        private fun showCumulativeChange(changeTextView: TextView, change: Int) {
+            changeTextView.text = if (change > 0) "+$change" else "$change"
+            changeTextView.visibility = View.VISIBLE
+
+            hideChangeRunnable?.let { handler.removeCallbacks(it) }
+
+            hideChangeRunnable = Runnable {
+                changeTextView.visibility = View.GONE
+                change_life = 0
+            }
+            handler.postDelayed(hideChangeRunnable!!, 2000)
+        }
+
+        fun resetLife() {
+            life = 40
+            change_life = 0
+            lifeDisplay.text = life.toString()
+            changeLifeView.text = ""
+            changeLifeView.visibility = View.GONE
         }
     }
 
-    // Function to update the life of a player
-    private fun updateLife(player: Int, delta: Int) {
-        when (player) {
-            1 -> {
-                player1Life += delta
-                player1Change += delta
-                showCumulativeChange(player1ChangeText, 1, player1Change)
-            }
-            2 -> {
-                player2Life += delta
-                player2Change += delta
-                showCumulativeChange(player2ChangeText, 2, player2Change)
-            }
-            3 -> {
-                player3Life += delta
-                player3Change += delta
-                showCumulativeChange(player3ChangeText, 3, player3Change)
-            }
-            4 -> {
-                player4Life += delta
-                player4Change += delta
-                showCumulativeChange(player4ChangeText, 4, player4Change)
-            }
-        }
-        updateLifeDisplay()
-    }
-    // Function to show cumulative life change above health counter
-    private fun showCumulativeChange(changeTextView: TextView, player: Int, change: Int) {
-        changeTextView.text = if ( change > 0) "+$change" else "$change"
-        changeTextView.visibility = TextView.VISIBLE
 
-        hideChangeRunnable[player]?.let {handler.removeCallbacks(it)}
-        val runnable = Runnable{
-            changeTextView.visibility = TextView.GONE
-            resetCumulativeChange(player)
-        }
-        hideChangeRunnable[player] = runnable
-        handler.postDelayed(runnable, 2000)     // shows 2 seconds cumulative life change
-    }
-
-    private fun resetCumulativeChange(player: Int){
-        when (player) {
-            1 -> player1Change = 0
-            2 -> player2Change = 0
-            3 -> player3Change = 0
-            4 -> player4Change = 0
-        }
-    }
-
-    // Function to reset all player life totals to 40
-    private fun resetLife() {
-        player1Life = 40
-        player2Life = 40
-        player3Life = 40
-        player4Life = 40
-        resetCumulativeChange(1)
-        resetCumulativeChange(2)
-        resetCumulativeChange(3)
-        resetCumulativeChange(4)
-        updateLifeDisplay()
-    }
-
-    // Function to update the life display TextViews with the current life totals
-    private fun updateLifeDisplay() {
-        player1LifeText.text = player1Life.toString()
-        player2LifeText.text = player2Life.toString()
-        player3LifeText.text = player3Life.toString()
-        player4LifeText.text = player4Life.toString()
-    }
 }
+

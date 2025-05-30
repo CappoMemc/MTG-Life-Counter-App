@@ -1,0 +1,11 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_2_players"
+        android:title="2 Players" />
+    <item
+        android:id="@+id/menu_3_players"
+        android:title="3 Players" />
+    <item
+        android:id="@+id/menu_4_players"
+        android:title="4 Players" />
+</menu>
