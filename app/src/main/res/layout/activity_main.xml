@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rootLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,14 +8,13 @@
     android:background="#222222"
     android:padding="8dp">
 
-    <!-- Reset Button at the top -->
-    <Button
-        android:id="@+id/resetButton"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Reset"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        app:title="MTG Life Counter"
+        app:titleTextColor="@android:color/white" />
 
     <!-- Players Grid fills remaining space -->
     <GridLayout

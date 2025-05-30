@@ -1,11 +1,19 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/menu_2_players"
-        android:title="2 Players" />
+        android:title="2 Players"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/menu_3_players"
-        android:title="3 Players" />
+        android:title="3 Players"
+        app:showAsAction="ifRoom"/>
     <item
         android:id="@+id/menu_4_players"
-        android:title="4 Players" />
+        android:title="4 Players"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/resetButton"
+        android:title="Reset"
+        app:showAsAction="ifRoom" />
 </menu>

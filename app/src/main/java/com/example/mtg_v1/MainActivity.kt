@@ -1,6 +1,6 @@
 package com.example.mtg_v1
 
-import android.annotation.SuppressLint
+
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -16,13 +16,13 @@ import android.view.MenuItem
 import android.widget.GridLayout
 import android.view.MotionEvent
 import android.widget.LinearLayout
+import androidx.appcompat.widget.Toolbar
 
 class MainActivity : AppCompatActivity() {
     // Player Class Setup Try1
     private val handler = Handler(Looper.getMainLooper())
     private val players = mutableListOf<Player>()
 
-    private lateinit var resetButton: Button
     private lateinit var playersLayout: GridLayout
 
   //  private val handler = Handler(Looper.getMainLooper())
@@ -33,14 +33,11 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
+
+
         playersLayout = findViewById(R.id.playersLayout)
         setupPlayers(4)
 
-        // Reset all players' life totals when button is clicked
-        resetButton = findViewById(R.id.resetButton)
-        resetButton.setOnClickListener {
-            players.forEach { it.resetLife() }
-        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -53,6 +50,10 @@ class MainActivity : AppCompatActivity() {
             R.id.menu_2_players -> setupPlayers(2)
             R.id.menu_3_players -> setupPlayers(3)
             R.id.menu_4_players -> setupPlayers(4)
+            R.id.resetButton -> {
+                players.forEach { it.resetLife() }
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -72,8 +73,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             val layoutParams = GridLayout.LayoutParams().apply {
-                width = 0
-                height = 0
+                width = GridLayout.LayoutParams.WRAP_CONTENT
+                height = GridLayout.LayoutParams.WRAP_CONTENT
                 columnSpec = GridLayout.spec(i % 2, 1f)
                 rowSpec = GridLayout.spec(i / 2, 1f)
                 setMargins(8, 8, 8, 8)
@@ -163,19 +164,16 @@ class MainActivity : AppCompatActivity() {
 
         init {
             setupButtonListeners()
-            resetLife()
         }
 
         private fun setupButtonListeners() {
             // Regular short-press
             plusButton.setOnClickListener {
                 updateLife(SHORT_PRESS_INCREMENT)
-                plusButton.performClick()
             }
 
             minusButton.setOnClickListener {
                 updateLife(-SHORT_PRESS_INCREMENT)
-                minusButton.performClick()
             }
 
             // Touch listener with proper long press + accessibility support
